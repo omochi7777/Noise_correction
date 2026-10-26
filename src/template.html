@@ -112,13 +112,29 @@ footer{color:var(--muted);font-size:12.5px;max-width:70ch}
   padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
 .sheet img{width:100%;border-radius:8px;border:1px solid var(--line)}
 .sheet .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.helpbtn{width:40px;height:40px;padding:0;justify-content:center;border-radius:50%;font-size:17px;flex:none}
+.mbtns .helpbtn{width:34px;height:34px;padding:0;font-size:15px}
+.sheet.help .inner{width:min(680px,100%);gap:14px;position:relative}
+@media (min-width:821px){.sheet.help{align-items:center}.sheet.help .inner{border-radius:16px;max-height:86%}}
+.sheet.help .top{position:sticky;top:-16px;background:var(--surface);margin:-16px 0 0;padding:16px 0 8px;z-index:1;border-bottom:1px solid var(--line)}
+.sheet.help .top b{font-family:var(--f-display);font-weight:400;font-size:20px}
+.help h3{font-size:15px;margin:4px 0 0}
+.help p,.help li{font-size:14px;line-height:1.7;margin:0}
+.help ol,.help ul{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:4px}
+.help dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 14px;font-size:14px;line-height:1.6}
+.help dt{font-weight:700;white-space:nowrap}
+.help dd{margin:0;color:var(--ink)}
+.help dd small{color:var(--muted);font-size:12.5px}
+@media (max-width:480px){.help dl{grid-template-columns:minmax(0,1fr);gap:2px}.help dd{margin-bottom:8px}}
+.help .tip{background:var(--check);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 
 @media (max-width:820px){
   html{height:100%;box-sizing:border-box}
   body{height:100%;box-sizing:border-box;padding-block:8px 0;overflow:hidden}
   .app{height:100%;gap:8px}
   header{flex-wrap:nowrap;align-items:center}
-  h1{font-size:19px}
+  h1{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  header>div:first-child{flex:1}
   .lede,footer,.panel,.splitrow{display:none}
   .filebtns{display:none}
   .mbtns{display:flex;gap:6px;flex:none}
@@ -167,9 +183,11 @@ footer{color:var(--muted);font-size:12.5px;max-width:70ch}
       <p class="lede">生成画像のザラつき・色ムラを測って、輪郭や文字を残したまま色面を滑らかにします。処理はすべてこのブラウザ内で行われ、画像はどこにも送信されません。</p>
     </div>
     <div class="filebtns">
+      <button class="helpbtn" data-help aria-label="使い方">？</button>
       <label class="btn" for="file">画像を選ぶ</label>
     </div>
     <div class="mbtns">
+      <button class="helpbtn" data-help aria-label="使い方">？</button>
       <label class="btn" for="file">画像</label>
       <button class="primary" id="saveM">保存</button>
     </div>
@@ -330,6 +348,48 @@ footer{color:var(--muted);font-size:12.5px;max-width:70ch}
     </aside>
   </div>
   <footer>使い方のコツ：まず「おすすめ設定」→ 4倍表示で文字の周りを確認 → 物足りなければ「平滑化の強さ」を上げる。ポスター調でもっと均一にしたいときは色数まとめを12〜16色で。長辺2400pxを超える画像は縮小して処理します。</footer>
+</div>
+
+<div class="sheet help" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="inner">
+    <div class="top"><b id="helpTitle">使い方</b><button id="helpClose">閉じる</button></div>
+    <p>生成画像に乗るマダラ状のノイズ（ザラつき・色ムラ）を測って、輪郭や文字を残したまま色面を滑らかにします。処理はすべてこのブラウザ内で行われ、画像はどこにも送信されません。</p>
+
+    <h3>基本の流れ</h3>
+    <ol>
+      <li>「画像を選ぶ」、ドラッグ＆ドロップ、貼り付けのどれかで画像を読み込む</li>
+      <li>自動で測定され、おすすめ設定が適用される</li>
+      <li>比較線を動かしたり、2倍・4倍表示にしたりして確認しながら調整する</li>
+      <li>「保存」でPNGとして書き出す</li>
+    </ol>
+    <p><small style="color:var(--muted)">スマホでは、下のチップ列を横にスワイプして項目を選び、スライダーか「−／＋」で調整します。</small></p>
+
+    <h3>各項目</h3>
+    <dl>
+      <dt>分析</dt><dd>平坦な色面だけで「細かいザラつき」と「にじみ状のマダラ」を数値化します。左が補正前、右が補正後です。</dd>
+      <dt>平滑化の強さ・回数</dt><dd>色面のムラをならします。輪郭をまたいでは混ざりません。回数を増やすと大きめのマダラまで消えます。</dd>
+      <dt>粒ノイズ除去</dt><dd>孤立した点ノイズを最初に取り除きます。</dd>
+      <dt>輪郭・文字の保護</dt><dd>線や文字の周りだけ元の画像に近づけます。</dd>
+      <dt>色数まとめ</dt><dd>主要色だけに絞ってベタ塗りに寄せます。<small>グラデーションには段差が出ます。</small></dd>
+      <dt>仕上げ</dt><dd>シャープ（とその太さ）、コントラスト、明るさ、彩度。補正をやり直さないので、すぐ反映されます。</dd>
+      <dt>部分ブラシ</dt><dd>「戻す」はなぞった所を補正前に、「滑らかに」はなぞった所に補正をかけます。塗った範囲は青（補正前のまま）と緑（滑らかにした所）で表示されます。「↶」で1手ずつ取り消せます。</dd>
+    </dl>
+
+    <h3>一部だけ滑らかにしたいとき</h3>
+    <ol>
+      <li>「部分ブラシ」を開く</li>
+      <li>「全体を補正前に」を押す（ブラシが自動で「滑らかに」になります）</li>
+      <li>滑らかにしたい所をなぞる</li>
+    </ol>
+    <p><small style="color:var(--muted)">スマホでブラシを使っている間は、2本指でスクロールします。終わったら「完了」を押してください。</small></p>
+
+    <h3>画像別のコツ</h3>
+    <div class="tip">
+      <p><b>ポスター・イラスト調</b>：おすすめ設定のままで十分です。もっと均一にしたいときは色数まとめを12〜16色に。</p>
+      <p><b>描き込みの多い絵（水彩・背景美術など）</b>：強さ20〜40、回数1回の軽めに。強くかけると細部が溶けます。ヒゲや瞳など細い所は部分ブラシの「戻す」で残せます。</p>
+    </div>
+    <p><small style="color:var(--muted)">長辺2400pxを超える画像は縮小して処理します。</small></p>
+  </div>
 </div>
 
 <div class="sheet" id="fallback" hidden>
@@ -769,6 +829,13 @@ function msg(t){const m=$('msg'); m.textContent=t; m.classList.toggle('hide',!t)
 let fbURL=null;
 function showFallback(){cA.toBlob(b=>{if(!b){msg('画像を書き出せませんでした');return;} if(fbURL)URL.revokeObjectURL(fbURL); fbURL=URL.createObjectURL(b); $('fbImg').src=fbURL; $('fallback').hidden=false;},'image/png');}
 $('fbClose').onclick=()=>{$('fallback').hidden=true;};
+let helpReturn=null;
+function openHelp(e){helpReturn=e&&e.currentTarget; $('help').hidden=false; $('help').querySelector('.inner').scrollTop=0; $('helpClose').focus();}
+function closeHelp(){$('help').hidden=true; if(helpReturn) helpReturn.focus();}
+document.querySelectorAll('[data-help]').forEach(b=>b.onclick=openHelp);
+$('helpClose').onclick=closeHelp;
+$('help').addEventListener('click',e=>{if(e.target===$('help'))closeHelp();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('help').hidden)closeHelp();});
 $('fallback').addEventListener('click',e=>{if(e.target===$('fallback'))$('fallback').hidden=true;});
 let downloads=null;
 (async()=>{try{ if(window.claude&&window.claude.use){ downloads=await window.claude.use('downloads'); } }catch(e){downloads=null;}})();
